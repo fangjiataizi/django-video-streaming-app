@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Play Video</title>
+</head>
+<body>
+    <h1>{{ video.title }}</h1>
+    <button onclick="window.open('{{ video.imagefile.url }}')">查看原始图片</button>
+    <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记的图片</button>
+    <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
+        <source src="{{ video.videofile.url }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
+    <script>
+    var video = document.getElementById("myVideo");
+    var videoId = document.getElementById("videoId").dataset.id;  // 从隐藏元素获取 video_id
+    video.addEventListener("click", function(e) {
+        var x = e.offsetX;
+        var y = e.offsetY;
+        console.log("Clicked at " + x + ", " + y);
+        // send the coordinates to the server
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/save_coordinates/", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("x=" + x + "&y=" + y+ "&video_id=" + videoId);
+    });
+    </script>
+</body>
+</html>
+
