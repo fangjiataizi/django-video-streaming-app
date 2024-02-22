@@ -25,6 +25,7 @@ urlpatterns = [
     path('upload/', views.video_upload, name='video_upload'),
     path('play/<int:id>/', views.video_play, name='video_play'),
     path('save_coordinates/', views.save_coordinates, name='save_coordinates'),
+    path('clear_marks/', views.clear_marks, name='clear_marks'),
 ]
 
 if settings.DEBUG:

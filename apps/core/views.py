@@ -5,10 +5,10 @@ from django.http import JsonResponse,HttpResponse
 from .models import Video
 from PIL import Image, ImageDraw
 from moviepy.editor import VideoFileClip
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage,default_storage
 
 from src import settings
-
+import shutil
 
 def get_video_dimensions(video_path):
     clip = VideoFileClip(video_path)
@@ -23,14 +23,19 @@ def video_upload(request):
         imagefile = request.FILES.get('imagefile')
         # 保存上传的文件
         video_fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'videos'))
+        video_path = video_fs.path(videofile.name)
+        # 如果文件已存在，先删除它
+        if default_storage.exists(video_path):
+            default_storage.delete(video_path)
         video_filename = video_fs.save(videofile.name, videofile)
 
         image_fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'images'))
+        image_path = image_fs.path(imagefile.name)
+        # 如果文件已存在，先删除它
+        if default_storage.exists(image_path):
+            default_storage.delete(image_path)
         image_filename = image_fs.save(imagefile.name, imagefile)
         marked_image_filename=image_filename.split('.')[0]+'.png'
-
-        video_path = video_fs.path(video_filename)
-        image_path = image_fs.path(image_filename)
         print('viedo_path:{},image_path:{}'.format(video_path,image_path))
         # 获取视频尺寸
         video_width, video_height = get_video_dimensions(video_path)
@@ -80,7 +85,6 @@ def mark_points(points, image_path):
 
 # 存储所有的点的坐标，键为视频的id，值为标注点列表
 points = {}
-
 @csrf_exempt
 def save_coordinates(request):
     x = request.POST.get('x')
@@ -106,4 +110,22 @@ def save_coordinates(request):
     points[video_id].append((int(x), int(y)))
     # 标记点
     mark_points(points[video_id], image_path)
+    return JsonResponse({'status': 'ok'})
+
+
+@csrf_exempt
+def clear_marks(request):
+    video_id = request.POST.get('video_id')
+    # 根据视频ID获取视频对象
+    video = Video.objects.get(id=video_id)
+    # 获取图片文件的路径
+    image_path = video.imagefile.path
+    # 获取标记的图片文件的路径
+    marked_image_path = video.marked_imagefile.path
+    # 如果标记的图片文件存在，删除它
+    if os.path.exists(marked_image_path):
+        os.remove(marked_image_path)
+    # 将原始图片复制为标记的图片
+    shutil.copyfile(image_path, marked_image_path)
+    points[video_id] = []
     return JsonResponse({'status': 'ok'})

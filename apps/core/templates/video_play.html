@@ -7,6 +7,8 @@
     <h1>{{ video.title }}</h1>
     <button onclick="window.open('{{ video.imagefile.url }}')">查看原始图片</button>
     <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记的图片</button>
+    <button id="clearButton">清空标记</button>
+    <br>
     <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
         <source src="{{ video.videofile.url }}" type="video/mp4">
         Your browser does not support the video tag.
@@ -24,6 +26,13 @@
         xhr.open("POST", "/save_coordinates/", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send("x=" + x + "&y=" + y+ "&video_id=" + videoId);
+    });
+    var clearButton = document.getElementById("clearButton");
+    clearButton.addEventListener("click", function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/clear_marks/", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("video_id=" + videoId);
     });
     </script>
 </body>
