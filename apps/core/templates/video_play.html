@@ -8,12 +8,14 @@
     <button onclick="window.open('{{ video.imagefile.url }}')">查看原始图片</button>
     <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记的图片</button>
     <button id="clearButton">清空标记</button>
+    <button id="generateButton">算法生成</button> <!-- 新增的按钮 -->
     <br>
     <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
         <source src="{{ video.videofile.url }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
     <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
+    <p id="loadingHint" style="display: none;">正在计算，预计需要1分钟，请稍后...</p>
     <script>
     var video = document.getElementById("myVideo");
     var videoId = document.getElementById("videoId").dataset.id;  // 从隐藏元素获取 video_id
@@ -34,6 +36,26 @@
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send("video_id=" + videoId);
     });
+    var generateButton = document.getElementById("generateButton");
+    var loadingHint = document.getElementById("loadingHint");  // 获取提示元素
+    generateButton.addEventListener("click", function() {
+        loadingHint.style.display = "block";  // 发送请求时显示提示
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/generate_content/", true);  // 假设你的后台函数的URL是'/generate_content/'
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        // 添加一个事件监听器来处理服务器返回的响应
+        xhr.onload = function() {
+            if (xhr.status == 200) {
+                // 如果服务器返回了200 OK，那么用服务器返回的HTML替换当前页面的HTML
+                document.documentElement.innerHTML = xhr.responseText;
+            } else {
+                console.log('Error: ' + xhr.status);  // 如果服务器返回了错误，那么在控制台打印错误信息
+            }
+            loadingHint.style.display = "none";  // 接收到响应时隐藏提示
+        };
+        xhr.send("video_id=" + videoId);
+    });
+
     </script>
 </body>
 </html>

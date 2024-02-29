@@ -1,5 +1,5 @@
 import os
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse,HttpResponse
 from .models import Video
@@ -9,6 +9,8 @@ from django.core.files.storage import FileSystemStorage,default_storage
 
 from src import settings
 import shutil
+
+from .algs import integration
 
 def get_video_dimensions(video_path):
     clip = VideoFileClip(video_path)
@@ -64,8 +66,6 @@ def video_play(request, id):
     return render(request, 'video_play.html', {'video': video})
 
 
-
-
 def mark_points(points, image_path):
     # 打开图片
     # 打开文件
@@ -81,7 +81,6 @@ def mark_points(points, image_path):
         # 保存图片
         save_image_path=image_path.split('.')[0]+'.png'
         image.save(save_image_path)
-
 
 # 存储所有的点的坐标，键为视频的id，值为标注点列表
 points = {}
@@ -112,7 +111,6 @@ def save_coordinates(request):
     mark_points(points[video_id], image_path)
     return JsonResponse({'status': 'ok'})
 
-
 @csrf_exempt
 def clear_marks(request):
     video_id = request.POST.get('video_id')
@@ -129,3 +127,64 @@ def clear_marks(request):
     shutil.copyfile(image_path, marked_image_path)
     points[video_id] = []
     return JsonResponse({'status': 'ok'})
+
+
+
+def video_display(request, algo1_video_path,algo2_video_path,image_path):
+    print('video_display is called')
+    print('algo1_video_path:', algo1_video_path)
+    print('algo2_video_path:', algo2_video_path)
+    print('image_path:', image_path)
+    # return render(request,'video_display.html')
+    return render(request, 'video_display.html', {
+        'algo1_video_path': algo1_video_path,
+        'algo2_video_path': algo2_video_path,
+        'image_path': image_path,
+    })
+
+
+def get_relative_path(absolute_path, base_path):
+    return os.path.relpath(absolute_path, base_path)
+
+
+@csrf_exempt
+def generate_content(request):
+    if request.method == 'POST':
+        video_id = request.POST.get('video_id')
+        video = Video.objects.get(id=video_id)
+        video_path = video.videofile.path
+        print(video_path)
+        # 在这里调用你的算法生成内容的函数
+        algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path = integration(video_path)
+        # algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path='1','2','3','4','5'
+        print(algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path)
+        integration_image_relative_path = get_relative_path(image_path, settings.MEDIA_ROOT)
+        video.imagefile = integration_image_relative_path
+        video.save()
+
+        video_urls=[algo1_video_path,algo2_video_path]
+        images_urls=[algo1_image_path,algo2_image_path]
+        # video_urls = [get_relative_path(url, settings.MEDIA_ROOT) for url in video_urls]
+        generate_videos=[]
+        for video_path,image_path in zip(video_urls,images_urls):
+            # 创建一个新的Video对象
+            gen_video = Video()
+            # 获取视频文件的宽度和高度
+            clip = VideoFileClip(video_path)
+            gen_video.width = clip.size[0]
+            gen_video.height = clip.size[1]
+            video_relative_path=get_relative_path(video_path, settings.MEDIA_ROOT)
+            image_relative_path=get_relative_path(image_path, settings.MEDIA_ROOT)
+            # 设置你的视频属性
+            gen_video.title = video_relative_path.split('/')[-1].split('.')[0]
+            # 设置你的视频文件的路径
+            gen_video.videofile = video_relative_path
+            gen_video.imagefile = image_relative_path
+            generate_videos.append(gen_video)
+            # 保存你的Video对象
+            gen_video.save()
+        return render(request, 'video_display.html', {'generate_videos': [video]+generate_videos})
+
+    else:
+        return JsonResponse({'error': 'Invalid Method'})
+

@@ -26,6 +26,7 @@ urlpatterns = [
     path('play/<int:id>/', views.video_play, name='video_play'),
     path('save_coordinates/', views.save_coordinates, name='save_coordinates'),
     path('clear_marks/', views.clear_marks, name='clear_marks'),
+    path('generate_content/', views.generate_content, name='generate_content'),
 ]
 
 if settings.DEBUG:
