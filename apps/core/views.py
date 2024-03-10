@@ -32,7 +32,7 @@ def video_upload(request):
         video_filename = video_fs.save(videofile.name, videofile)
 
         #默认存储图片
-        image_fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'images'))
+        # image_fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'images'))
         # image_path = image_fs.path('default.bmp')
         # # 如果文件已存在，先删除它
         # if default_storage.exists(image_path):
@@ -55,7 +55,7 @@ def video_upload(request):
         marked_image_filename = os.path.join('images', 'default.bmp')
         # marked_image_filename = os.path.join('images', marked_image_filename)
         # print('video_filename:{},image_filename:{},marked_image_filename:{}'.format(video_filename, image_filename,marked_image_filename))
-        video = Video(title=title, videofile=video_filename, width=video_width, height=video_height,imagefile=image_filename,marked_imagefile=marked_image_filename)
+        video = Video(title=title, upload_videofile=video_filename, width=video_width, height=video_height,imagefile=image_filename,marked_imagefile=marked_image_filename)
         # video = Video(title=title, videofile=video_filename, width=video_width, height=video_height)
         video.save()
         message = '视频上传成功!'
@@ -103,7 +103,7 @@ def save_coordinates(request):
     # 根据视频ID获取视频对象
     video = Video.objects.get(id=video_id)
     # 获取视频文件的路径
-    video_path = video.videofile.path
+    video_path = video.generate_videofile.path
     # 获取视频文件的目录和文件名（不包括扩展名）
     directory, filename = os.path.split(video_path)
     print("directory:{}, filename:{}".format(directory, filename))
@@ -218,25 +218,32 @@ def generate_content(request):
         video_id = request.POST.get('video_id')
         video = Video.objects.get(id=video_id)
         # 在这里调用你的算法生成内容的函数
-        algo3_image_path,algo3_video_path=algo3(video)
-        print(algo3_image_path,algo3_video_path)
-        algo3_video_relative_path=get_relative_path(algo3_video_path, settings.MEDIA_ROOT)
-        algo3_image_relative_path=get_relative_path(algo3_image_path, settings.MEDIA_ROOT)
-        gen_video = Video()
-        # 获取视频文件的宽度和高度
-        clip = VideoFileClip(algo3_video_path)
-        gen_video.width = clip.size[0]
-        gen_video.height = clip.size[1]
-        # 设置你的视频属性
-        gen_video.title = algo3_video_relative_path.split('/')[-1].split('.')[0]
-        # 设置你的视频文件的路径
-        gen_video.videofile = algo3_video_relative_path
-        gen_video.imagefile = algo3_image_relative_path
-        gen_video.marked_imagefile = algo3_image_relative_path.replace(".jpg",".png")
-        gen_video.save()
-        print('gen_video:',gen_video.id,gen_video.title,gen_video.videofile,gen_video.imagefile,gen_video.marked_imagefile)
+        # algo3_image_path,algo3_video_path=algo3(video)
+        generate_pic_path, generate_video_path, transfer_video_path=algo3(video)
+        print(generate_pic_path, generate_video_path, transfer_video_path)
+        generate_pic_relative_path=get_relative_path(generate_pic_path, settings.MEDIA_ROOT)
+        generate_video_relative_path=get_relative_path(generate_video_path, settings.MEDIA_ROOT)
+        transfer_video_relative_path=get_relative_path(transfer_video_path, settings.MEDIA_ROOT)
+        video.imagefile = generate_pic_relative_path
+        video.marked_imagefile=generate_pic_relative_path.replace(".jpg",".png")
+        video.generate_videofile = generate_video_relative_path
+        video.transfer_videofile = transfer_video_relative_path
+        # gen_video = Video()
+        # # 获取视频文件的宽度和高度
+        # clip = VideoFileClip(algo3_video_path)
+        # gen_video.width = clip.size[0]
+        # gen_video.height = clip.size[1]
+        # # 设置你的视频属性
+        # gen_video.title = algo3_video_relative_path.split('/')[-1].split('.')[0]
+        # # 设置你的视频文件的路径
+        # gen_video.videofile = algo3_video_relative_path
+        # gen_video.imagefile = algo3_image_relative_path
+        # gen_video.marked_imagefile = algo3_image_relative_path.replace(".jpg",".png")
+        # gen_video.save()
+        video.save()
+        # print('gen_video:',gen_video.id,gen_video.title,gen_video.videofile,gen_video.imagefile,gen_video.marked_imagefile)
         # return redirect('video_mark', id=gen_video.id)
-        return JsonResponse({'redirect_url': reverse('video_mark', args=[gen_video.id])})
+        return JsonResponse({'redirect_url': reverse('video_mark', args=[video.id])})
     else:
         return JsonResponse({'error': 'Invalid Method'})
 

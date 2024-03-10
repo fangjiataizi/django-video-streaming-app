@@ -220,14 +220,40 @@ def integration(vv):
     return algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path
 
 
+def transfer_video_to_mp4(v_path,cal_dir):
+    cap = cv2.VideoCapture(v_path)
+    # 获取视频的宽度、高度和帧率
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    # 创建一个VideoWriter对象
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 或者使用'X264'
+    transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
+    out = cv2.VideoWriter(transfer_video_path, fourcc, fps, (frame_width, frame_height))
+    # 读取和写入每一帧
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        out.write(frame)
+    # 释放资源
+    cap.release()
+    out.release()
+    print('init video transfer to mp4')
+    return transfer_video_path
+
+
 def algo3(video):
-    v_path= video.videofile.path
+    v_path= video.upload_videofile.path
     print("v_path:{}".format(v_path))
     cal_dir = os.path.join(settings.MEDIA_ROOT, 'test01/algo3')
+    print("cal_dir:{}".format(cal_dir))
+    transfer_video_path=transfer_video_to_mp4(v_path,cal_dir)
+    print("transfer_video_path:{}".format(transfer_video_path))
+
     files = glob.glob(cal_dir+'/02_intermediate/*')
     for f in files:
         os.remove(f)
-    # cap = cv2.VideoCapture("01_org_video/{}".format(v_path))
     cap=cv2.VideoCapture(v_path)
     frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     print(frame_count)
@@ -259,8 +285,8 @@ def algo3(video):
         out.write(img_array[i])
     out.release()
 
-    res_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
-    out=cv2.VideoWriter(res_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 24, size)
+    generate_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
+    out=cv2.VideoWriter(generate_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 24, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
     out.release()
@@ -292,9 +318,9 @@ def algo3(video):
         read_pic_path = cal_dir + "/02_intermediate/tt_{}.jpg".format(k)
         II += cv2.imread(read_pic_path)
 
-    res_pic_path=cal_dir+"/03_output/P_{}.jpg".format(v_path.split("/")[-1].split(".")[0])
-    cv2.imwrite(res_pic_path, II)
+    generate_pic_path=cal_dir+"/03_output/P_{}.jpg".format(v_path.split("/")[-1].split(".")[0])
+    cv2.imwrite(generate_pic_path, II)
     cap.release()
     cv2.destroyAllWindows()
-    print("res_pic_path:{}".format(res_pic_path))
-    return res_pic_path,res_video_path
+    print("generate_pic_path:{}".format(generate_pic_path))
+    return generate_pic_path,generate_video_path,transfer_video_path
