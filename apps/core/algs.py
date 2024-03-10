@@ -260,7 +260,7 @@ def algo3(video):
     out.release()
 
     res_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
-    out=cv2.VideoWriter(res_video_path, cv2.VideoWriter_fourcc(*'H264'), 24, size)
+    out=cv2.VideoWriter(res_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 24, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
     out.release()
