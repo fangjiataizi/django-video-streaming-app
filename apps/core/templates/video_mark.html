@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,13 +6,15 @@
     <title>标注视频</title>
     <style>
         body {
-            background-color: #f0f0f0;
+            background-image: url("{% static 'images/background2.png' %}"); /* 这是你的背景图片位置 */
+            background-size: cover; /* 背景图片覆盖整个页面 */
             font-family: "微软雅黑", sans-serif;
+            color: #333;
         }
         .container {
             width: 80%;
-            margin: 0 auto;
-            background-color: #fff;
+            margin: 50px auto;
+            background-color: rgba(255, 255, 255, 0.8); /* 增加透明度，使背景图片可见 */
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0px 0px 10px 0px #000;
@@ -20,6 +23,16 @@
             text-align: center;
             color: #333;
         }
+        video {
+            display: block;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+        img {
+            display: block;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
         button {
             padding: 10px 20px;
             background-color: #007BFF;
@@ -27,7 +40,8 @@
             border: none;
             border-radius: 3px;
             cursor: pointer;
-            margin-top: 20px;
+            display: block;
+            margin: 20px auto;
         }
         button:hover {
             background-color: #0056b3;
@@ -42,17 +56,16 @@
 <body>
     <div class="container">
         <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
-        <h1>算法生成视频：{{ video.title }}成功，使用鼠标点击视频播放后鼠标点击想要标记的点进行标注，标注后可以点击标记图片查看标注结果</h1>
+        <h1>欢迎标注视频</h1>
+        <p>您已成功生成视频：{{ video.title }}。请播放视频，并点击您想要标注的点。完成标注后，点击下方的"查看标记图片"按钮查看结果。</p>
         <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
-          <source src="{{ video.videofile.url }}" type="video/mp4">
-          Your browser does not support the video tag.
+            <source src="{{ video.videofile.url }}" type="video/mp4">
+            Your browser does not support the video tag.
         </video>
-        <br>
-        <button onclick="window.open('{{ video.marked_imagefile.url }}')">标记图片</button>
+        <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记图片</button>
         <button id="clearButton">清空标记</button>
         <h1>算法生成图片</h1>
         <img src="{{ video.imagefile.url }}" alt="Your Image">
-
         <script>
         window.onload = function() {
             console.log("Document is loaded");

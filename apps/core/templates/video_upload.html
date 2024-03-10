@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,13 +6,15 @@
     <title>视频上传</title>
     <style>
         body {
-            background-color: #f0f0f0;
+            background-image: url("{% static 'images/background2.png' %}"); /* 这是你的背景图片位置 */
+            background-size: cover; /* 背景图片覆盖整个页面 */
             font-family: "微软雅黑", sans-serif;
+            color: #333;
         }
         .container {
             width: 80%;
-            margin: 0 auto;
-            background-color: #fff;
+            margin: 50px auto;
+            background-color: rgba(255, 255, 255, 0.8); /* 增加透明度，使背景图片可见 */
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0px 0px 10px 0px #000;
@@ -28,12 +31,14 @@
         label {
             margin-bottom: 10px;
             color: #666;
+            font-size: 16px;
         }
         input[type="text"], input[type="file"] {
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 3px;
+            font-size: 14px;
         }
         input[type="submit"] {
             padding: 10px 20px;
@@ -42,12 +47,27 @@
             border: none;
             border-radius: 3px;
             cursor: pointer;
+            font-size: 16px;
         }
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
         p {
             color: red;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
