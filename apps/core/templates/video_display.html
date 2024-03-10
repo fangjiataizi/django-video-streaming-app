@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Video Player</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Video</title>
 </head>
 <body>
-    {% for video in generate_videos %}
-    <video class="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
+    <h1>{{ video.title }}</h1>
+    <button onclick="window.open('{{ video.imagefile.url }}')">查看原始图片</button>
+    <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记的图片</button>
+    <button id="clearButton">清空标记</button>
+    <br>
+    <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
         <source src="{{ video.videofile.url }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
-    <a href="{{ video.imagefile.url }}" target="_blank">
-        <img src="{{ video.imagefile.url }}" width="{{ video.width }}" height="{{ video.height }}">
-    </a>
-    {% endfor %}
-
-<button id="playPauseBtn">播放/暂停</button>
-<script>
-$(document).ready(function() {
-    var play = true;
-    $('#playPauseBtn').click(function() {
-        console.log('Button clicked, play:', play);
-        $('.myVideo').each(function() {
-            console.log('Video element:', this);
-            this.play();
-            this.pause();
-            if (play) {
-                this.play();
-            } else {
-                this.pause();
-            }
-        });
-        play = !play;
+    <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
+    <script>
+    var video = document.getElementById("myVideo");
+    var videoId = document.getElementById("videoId").dataset.id;  // 从隐藏元素获取 video_id
+    video.addEventListener("click", function(e) {
+        var x = e.offsetX;
+        var y = e.offsetY;
+        console.log("Clicked at " + x + ", " + y);
+        // send the coordinates to the server
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/save_coordinates/", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("x=" + x + "&y=" + y+ "&video_id=" + videoId);
     });
-});
-</script>
+    var clearButton = document.getElementById("clearButton");
+    clearButton.addEventListener("click", function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/clear_marks/", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("video_id=" + videoId);
+    });
+    </script>
 </body>
 </html>

@@ -23,7 +23,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('upload/', views.video_upload, name='video_upload'),
-    path('play/<int:id>/', views.video_play, name='video_play'),
+    path('play/<int:id>/<int:is_display>', views.video_play, name='video_play'),
+    path('mark/<int:id>', views.video_mark, name='video_mark'),
     path('save_coordinates/', views.save_coordinates, name='save_coordinates'),
     path('clear_marks/', views.clear_marks, name='clear_marks'),
     path('generate_content/', views.generate_content, name='generate_content'),

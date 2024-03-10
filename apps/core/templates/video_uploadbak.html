@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>播放视频</title>
+    <title>视频上传</title>
     <style>
         body {
             background-color: #f0f0f0;
@@ -20,60 +20,51 @@
             text-align: center;
             color: #333;
         }
-        button {
+        form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        label {
+            margin-bottom: 10px;
+            color: #666;
+        }
+        input[type="text"], input[type="file"] {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
             padding: 10px 20px;
             background-color: #007BFF;
             color: #fff;
             border: none;
             border-radius: 3px;
             cursor: pointer;
-            margin-top: 20px;
         }
-        button:hover {
+        input[type="submit"]:hover {
             background-color: #0056b3;
         }
         p {
             color: red;
-            text-align: center;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>上传视频</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="title">标题:</label>
+            <input type="text" id="title" name="title" required><br>
+            <label for="videofile">视频:</label>
+            <input type="file" id="videofile" name="videofile" accept="video/*" required><br>
+            <input type="submit" value="上传">
+        </form>
+        {% if message %}
+        <p>{{ message }}</p>
         <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
-        {% if is_display %}
-        <h1>生成视频：{{ video.title }}成功</h1>
-        <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
-          <source src="{{ video.videofile.url }}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-        <button onclick="window.open('{{ video.imagefile.url }}')">查看原始图片</button>
-        <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记的图片</button>
-        <button id="clearButton">清空标记</button>
-        <script>
-        var videoId = document.getElementById("videoId").dataset.id;
-        var video = document.getElementById("myVideo");
-        video.addEventListener("click", function(e) {
-            var x = e.offsetX;
-            var y = e.offsetY;
-            console.log("Clicked at " + x + ", " + y);
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/save_coordinates/", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.send("x=" + x + "&y=" + y+ "&video_id=" + videoId);
-        });
-        var clearButton = document.getElementById("clearButton");
-        clearButton.addEventListener("click", function() {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/clear_marks/", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.send("video_id=" + videoId);
-        });
-        </script>
-        {% endif %}
-        {% if not is_display %}
-        <h1>上传视频：{{ video.title }}成功</h1>
         <button id="generateButton">点击算法生成</button>
         <p id="loadingHint" style="display: none;">正在计算，预计需要1分钟左右，请稍后...</p>
         <script>
@@ -100,3 +91,5 @@
     </div>
 </body>
 </html>
+
+

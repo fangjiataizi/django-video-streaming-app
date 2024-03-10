@@ -220,4 +220,81 @@ def integration(vv):
     return algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path
 
 
-# img3 = integration("五矿1.mp4")
+def algo3(video):
+    v_path= video.videofile.path
+    print("v_path:{}".format(v_path))
+    cal_dir = os.path.join(settings.MEDIA_ROOT, 'test01/algo3')
+    files = glob.glob(cal_dir+'/02_intermediate/*')
+    for f in files:
+        os.remove(f)
+    # cap = cv2.VideoCapture("01_org_video/{}".format(v_path))
+    cap=cv2.VideoCapture(v_path)
+    frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    print(frame_count)
+
+    img_array = []
+    for i in range(int(frame_count)):
+        _, img = cap.read(i)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        s = int(round(img.shape[0] / 600, 1) * 10)
+        filterSize = (s, s)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, filterSize)
+        tophat_img = cv2.morphologyEx(img, cv2.MORPH_TOPHAT, kernel)
+
+        kernelx = np.array([[1, 1, 1], [0, 0, 0], [-1, -1, -1]], dtype=int)
+        kernely = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]], dtype=int)
+        x = cv2.filter2D(tophat_img, cv2.CV_16S, kernelx)
+        y = cv2.filter2D(tophat_img, cv2.CV_16S, kernely)
+        absX = cv2.convertScaleAbs(x)
+        absY = cv2.convertScaleAbs(y)
+        Prewitt = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
+
+        img_array.append(cv2.cvtColor(Prewitt, cv2.COLOR_GRAY2BGR))
+
+    size = (Prewitt.shape[1], Prewitt.shape[0])
+    processed_file_path= cal_dir+'/03_output/V_{}_processed.avi'.format(v_path.split("/")[-1].split(".")[0])
+    out = cv2.VideoWriter(processed_file_path, cv2.VideoWriter_fourcc(*'DIVX'), 10, size)
+    for i in range(len(img_array)):
+        out.write(img_array[i])
+    out.release()
+
+    res_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
+    out=cv2.VideoWriter(res_video_path, cv2.VideoWriter_fourcc(*'H264'), 24, size)
+    for i in range(len(img_array)):
+        out.write(img_array[i])
+    out.release()
+    cap = cv2.VideoCapture(processed_file_path)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    one_frame = np.zeros((height, width), dtype=np.uint8)
+    two_frame = np.zeros((height, width), dtype=np.uint8)
+    three_frame = np.zeros((height, width), dtype=np.uint8)
+
+    II = np.zeros((height, width, 3), dtype=np.uint8)
+
+    for k in range(int(frame_count)):
+        ret, frame = cap.read()
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if not ret:
+            break
+        one_frame, two_frame, three_frame = two_frame, three_frame, frame_gray
+        abs1 = cv2.absdiff(one_frame, two_frame)
+        _, thresh1 = cv2.threshold(abs1, 15, 555, cv2.THRESH_BINARY)
+        abs2 = cv2.absdiff(two_frame, three_frame)
+        _, thresh2 = cv2.threshold(abs2, 15, 555, cv2.THRESH_BINARY)
+
+        binary1 = cv2.bitwise_or(thresh1, thresh2)
+        out_pic_path=cal_dir+"/02_intermediate/tt_{}.jpg".format(k)
+        cv2.imwrite(out_pic_path, binary1)
+
+    for k in range(int(frame_count)):
+        read_pic_path = cal_dir + "/02_intermediate/tt_{}.jpg".format(k)
+        II += cv2.imread(read_pic_path)
+
+    res_pic_path=cal_dir+"/03_output/P_{}.jpg".format(v_path.split("/")[-1].split(".")[0])
+    cv2.imwrite(res_pic_path, II)
+    cap.release()
+    cv2.destroyAllWindows()
+    print("res_pic_path:{}".format(res_pic_path))
+    return res_pic_path,res_video_path
