@@ -30,7 +30,6 @@ def video_upload(request):
         if default_storage.exists(video_path):
             default_storage.delete(video_path)
         video_filename = video_fs.save(videofile.name, videofile)
-
         #默认存储图片
         # image_fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'images'))
         # image_path = image_fs.path('default.bmp')

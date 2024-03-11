@@ -75,17 +75,19 @@
               </video>
           </div>
       </div>
-
         <button onclick="window.open('{{ video.marked_imagefile.url }}')">查看标记图片</button>
         <button id="clearButton">清空标记</button>
-        <h1>算法生成图片</h1>
-        <img src="{{ video.imagefile.url }}" alt="Your Image">
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <h1>算法生成图片</h1>
+            <img src="{{ video.imagefile.url }}" alt="Your 算法生成 Image">
+          </div>
         <script>
         window.onload = function() {
             console.log("Document is loaded");
 
             var videoId = document.getElementById("videoId").dataset.id;
-            var video = document.getElementById("myVideo");
+            var video = document.getElementById("myVideo_transfer");
 
             if (video) {
                 console.log("Video element is found");
