@@ -221,6 +221,18 @@ def integration(vv):
     return algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path
 
 
+def transfer_video_to_webm(v_path, cal_dir):
+    # 创建一个VideoFileClip对象
+    clip = VideoFileClip(v_path)
+
+    # 定义输出视频的路径
+    transfer_video_path = cal_dir + '/03_output/V_{}.webm'.format(v_path.split("/")[-1].split(".")[0])
+
+    # 将clip写入文件
+    clip.write_videofile(transfer_video_path, codec='libvpx')
+
+    print('init video transfer to webm')
+    return transfer_video_path
 
 def transfer_video_to_mp4_moviepy(v_path, cal_dir):
     # 创建一个VideoFileClip对象
@@ -242,7 +254,7 @@ def transfer_video_to_mp4(v_path,cal_dir):
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
     # 创建一个VideoWriter对象
-    fourcc = cv2.VideoWriter_fourcc(*'VP80')  # 或者使用'X264'
+    fourcc = cv2.VideoWriter_fourcc(*'X264')  # 或者使用'X264'
     transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
     out = cv2.VideoWriter(transfer_video_path, fourcc, fps, (frame_width, frame_height))
     # 读取和写入每一帧
