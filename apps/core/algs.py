@@ -227,7 +227,7 @@ def transfer_video_to_mp4(v_path,cal_dir):
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
     # 创建一个VideoWriter对象
-    fourcc = cv2.VideoWriter_fourcc(*'H264')  # 或者使用'X264'
+    fourcc = cv2.VideoWriter_fourcc(*'MP4V')  # 或者使用'X264'
     transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
     out = cv2.VideoWriter(transfer_video_path, fourcc, fps, (frame_width, frame_height))
     # 读取和写入每一帧
@@ -286,7 +286,7 @@ def algo3(video):
     out.release()
 
     generate_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
-    out=cv2.VideoWriter(generate_video_path, cv2.VideoWriter_fourcc(*'H264'), 24, size)
+    out=cv2.VideoWriter(generate_video_path, cv2.VideoWriter_fourcc(*'MP4V'), 24, size)
     for i in range(len(img_array)):
         out.write(img_array[i])
     out.release()
