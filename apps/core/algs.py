@@ -12,6 +12,7 @@ import glob
 import matplotlib.pyplot as plt
 import os
 from src import settings
+from moviepy.editor import VideoFileClip
 
 
 def denoise(input_image):
@@ -220,6 +221,19 @@ def integration(vv):
     return algo1_video_path,algo2_video_path,algo1_image_path,algo2_image_path,image_path
 
 
+
+def transfer_video_to_mp4_moviepy(v_path, cal_dir):
+    # 创建一个VideoFileClip对象
+    clip = VideoFileClip(v_path)
+    # 定义输出视频的路径
+    transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
+    # 将clip写入文件
+    clip.write_videofile(transfer_video_path, codec='libx264')
+    print('init video transfer to mp4')
+    return transfer_video_path
+
+
+
 def transfer_video_to_mp4(v_path,cal_dir):
     cap = cv2.VideoCapture(v_path)
     # 获取视频的宽度、高度和帧率
@@ -248,7 +262,7 @@ def algo3(video):
     print("v_path:{}".format(v_path))
     cal_dir = os.path.join(settings.MEDIA_ROOT, 'test01/algo3')
     print("cal_dir:{}".format(cal_dir))
-    transfer_video_path=transfer_video_to_mp4(v_path,cal_dir)
+    transfer_video_path=transfer_video_to_mp4_moviepy(v_path,cal_dir)
     print("transfer_video_path:{}".format(transfer_video_path))
 
     files = glob.glob(cal_dir+'/02_intermediate/*')
