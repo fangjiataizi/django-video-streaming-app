@@ -228,7 +228,8 @@ def transfer_video_to_mp4_moviepy(v_path, cal_dir):
     # 定义输出视频的路径
     transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
     # 将clip写入文件
-    clip.write_videofile(transfer_video_path, codec='libx264')
+    # clip.write_videofile(transfer_video_path, codec='libx264')
+    clip.write_videofile(transfer_video_path, codec='libx264', ffmpeg_params=['-pix_fmt', 'yuv420p'])
     print('init video transfer to mp4')
     return transfer_video_path
 
