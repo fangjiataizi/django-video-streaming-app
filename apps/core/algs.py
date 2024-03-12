@@ -234,14 +234,12 @@ def transfer_video_to_webm(v_path, cal_dir):
     print('init video transfer to webm')
     return transfer_video_path
 
-def transfer_video_to_mp4_moviepy(v_path, cal_dir):
+def transfer_video_to_mp4_moviepy(v_path, transfer_video_path):
     # 创建一个VideoFileClip对象
     clip = VideoFileClip(v_path)
-    # 定义输出视频的路径
-    transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
     # 将clip写入文件
-    # clip.write_videofile(transfer_video_path, codec='libx264')
-    clip.write_videofile(transfer_video_path, codec='libvpx-vp9', ffmpeg_params=['-pix_fmt', 'yuv420p'])
+    clip.write_videofile(transfer_video_path, codec='libx264')
+    # clip.write_videofile(transfer_video_path, codec='libvpx-vp9', ffmpeg_params=['-pix_fmt', 'yuv420p'])
     print('init video transfer to mp4')
     return transfer_video_path
 
@@ -275,7 +273,8 @@ def algo3(video):
     print("v_path:{}".format(v_path))
     cal_dir = os.path.join(settings.MEDIA_ROOT, 'test01/algo3')
     print("cal_dir:{}".format(cal_dir))
-    transfer_video_path=transfer_video_to_mp4_moviepy(v_path,cal_dir)
+    transfer_video_path = cal_dir + '/03_output/V_{}.mp4'.format(v_path.split("/")[-1].split(".")[0])
+    transfer_video_path=transfer_video_to_mp4_moviepy(v_path,transfer_video_path)
     print("transfer_video_path:{}".format(transfer_video_path))
 
     files = glob.glob(cal_dir+'/02_intermediate/*')
@@ -313,10 +312,12 @@ def algo3(video):
     out.release()
 
     generate_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
-    out=cv2.VideoWriter(generate_video_path, cv2.VideoWriter_fourcc(*'VP80'), 24, size)
-    for i in range(len(img_array)):
-        out.write(img_array[i])
-    out.release()
+    generate_video_path = transfer_video_to_mp4_moviepy(v_path, generate_video_path)
+    # out=cv2.VideoWriter(generate_video_path, cv2.VideoWriter_fourcc(*'VP80'), 24, size)
+    # for i in range(len(img_array)):
+    #     out.write(img_array[i])
+    # out.release()
+
     cap = cv2.VideoCapture(processed_file_path)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
