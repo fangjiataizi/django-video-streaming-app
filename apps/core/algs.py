@@ -312,7 +312,7 @@ def algo3(video):
     out.release()
 
     generate_video_path = cal_dir + '/03_output/V_{}_processed.mp4'.format(v_path.split("/")[-1].split(".")[0])
-    generate_video_path = transfer_video_to_mp4_moviepy(v_path, generate_video_path)
+    generate_video_path = transfer_video_to_mp4_moviepy(processed_file_path, generate_video_path)
     # out=cv2.VideoWriter(generate_video_path, cv2.VideoWriter_fourcc(*'VP80'), 24, size)
     # for i in range(len(img_array)):
     #     out.write(img_array[i])
