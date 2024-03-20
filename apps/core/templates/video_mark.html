@@ -62,14 +62,16 @@
         <div style="display: flex; justify-content: space-between;">
           <div>
               <h2>上传视频</h2>
-              <video id="myVideo_transfer" width="{{ video.width }}" height="{{ video.height }}" controls>
+<!--              <video id="myVideo_transfer" width="{{ video.width }}" height="{{ video.height }}" controls>-->
+                  <video id="myVideo_transfer" width="480" height="320" controls>
                   <source src="{{ video.transfer_videofile.url }}" type="video/mp4">
                   Your browser does not support the video tag.
               </video>
           </div>
           <div>
               <h2>算法处理后视频</h2>
-              <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>
+<!--              <video id="myVideo" width="{{ video.width }}" height="{{ video.height }}" controls>-->
+                  <video id="myVideo" width="480" height="320" controls>
                   <source src="{{ video.generate_videofile.url }}" type="video/mp4">
                   Your browser does not support the video tag.
               </video>

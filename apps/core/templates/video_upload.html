@@ -74,7 +74,7 @@
 <body>
     <div class="container">
         <h1>上传视频</h1>
-        <form method="post" enctype="multipart/form-data">
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <label for="title">标题:</label>
             <input type="text" id="title" name="title" required><br>
@@ -82,11 +82,12 @@
             <input type="file" id="videofile" name="videofile" accept="video/*" required><br>
             <input type="submit" value="上传">
         </form>
+        <div id="progress" style="display: none;">上传进度: <span id="progressPercent">0</span>%</div>
         {% if message %}
         <p>{{ message }}</p>
         <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
         <button id="generateButton">点击算法生成</button>
-        <p id="loadingHint" style="display: none;">正在计算，预计需要1分钟左右，请稍后...</p>
+        <p id="loadingHint" style="display: none;">正在计算，预计需要10秒左右，请稍后...</p>
         <script>
 function getCookie(name) {
     var cookieValue = null;
@@ -130,6 +131,35 @@ generateButton.addEventListener("click", function() {
     loadingHint.style.display = "none";
 });
 });
+
+// 阻止表单的默认提交行为
+            document.getElementById('uploadForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                var file = document.getElementById('videofile').files[0];
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/your-upload-url', true);
+                xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        var percentComplete = (e.loaded / e.total) * 100;
+                        document.getElementById('progress').style.display = 'block';
+                        document.getElementById('progressPercent').textContent = percentComplete.toFixed(2);
+                    }
+                };
+
+                xhr.onload = function() {
+                    if (this.status == 200) {
+                        console.log('Upload complete');
+                        // 上传完成处理
+                    }
+                };
+
+                var formData = new FormData();
+                formData.append('title', document.getElementById('title').value);
+                formData.append('videofile', file);
+                xhr.send(formData);
+            }, false);
 </script>
         {% endif %}
     </div>

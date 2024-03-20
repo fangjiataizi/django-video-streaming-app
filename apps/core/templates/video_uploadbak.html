@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,13 +6,15 @@
     <title>视频上传</title>
     <style>
         body {
-            background-color: #f0f0f0;
+<!--            background-image: url("{% static 'images/background2.png' %}"); /* 这是你的背景图片位置 */-->
+            background-size: cover; /* 背景图片覆盖整个页面 */
             font-family: "微软雅黑", sans-serif;
+            color: #333;
         }
         .container {
             width: 80%;
-            margin: 0 auto;
-            background-color: #fff;
+            margin: 50px auto;
+            background-color: rgba(255, 255, 255, 0.8); /* 增加透明度，使背景图片可见 */
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0px 0px 10px 0px #000;
@@ -28,12 +31,14 @@
         label {
             margin-bottom: 10px;
             color: #666;
+            font-size: 16px;
         }
         input[type="text"], input[type="file"] {
             padding: 10px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 3px;
+            font-size: 14px;
         }
         input[type="submit"] {
             padding: 10px 20px;
@@ -42,12 +47,27 @@
             border: none;
             border-radius: 3px;
             cursor: pointer;
+            font-size: 16px;
         }
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
         p {
             color: red;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -66,27 +86,52 @@
         <p>{{ message }}</p>
         <div id="videoId" data-id="{{ video.id }}" style="display: none;"></div>
         <button id="generateButton">点击算法生成</button>
-        <p id="loadingHint" style="display: none;">正在计算，预计需要1分钟左右，请稍后...</p>
+        <p id="loadingHint" style="display: none;">正在计算，预计需要10秒左右，请稍后...</p>
         <script>
-        var videoId = document.getElementById("videoId").dataset.id;
-        var generateButton = document.getElementById("generateButton");
-        var loadingHint = document.getElementById("loadingHint");
-        generateButton.addEventListener("click", function() {
-            loadingHint.style.display = "block";
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/generate_content/", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onload = function() {
-                if (xhr.status == 200) {
-                    document.documentElement.innerHTML = xhr.responseText;
-                } else {
-                    console.log('Error: ' + xhr.status);
-                }
-                loadingHint.style.display = "none";
-            };
-            xhr.send("video_id=" + videoId);
-        });
-        </script>
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var videoId = document.getElementById("videoId").dataset.id;
+var generateButton = document.getElementById("generateButton");
+var loadingHint = document.getElementById("loadingHint");
+
+generateButton.addEventListener("click", function() {
+    loadingHint.style.display = "block";
+    fetch("/generate_content/", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": getCookie("csrftoken")
+    },
+    body: "video_id=" + videoId
+}).then(response => response.json())  // 解析响应内容为JSON
+.then(data => {
+    if (data.redirect_url) {
+        // 如果服务器返回了一个重定向URL，进行跳转
+        window.location.href = data.redirect_url;
+    } else {
+        console.log('Error: No redirect URL received');
+        loadingHint.style.display = "none";
+    }
+}).catch(function(error) {
+    console.log('Fetch Error: ' + error);
+    loadingHint.style.display = "none";
+});
+});
+
+</script>
         {% endif %}
     </div>
 </body>
