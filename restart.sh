@@ -10,7 +10,7 @@
 #python3 knowledge_embedding.py
 #cd ../../../../credit_voice_service/
 
-GREP_PROCESS1="python3 manage.py"
+GREP_PROCESS1="python manage.py"
 ##################### restart server #############################
 PID_RANK=`ps -ef|grep "$GREP_PROCESS1"|grep -v grep|awk '{print $2}'|xargs`
 if [  "$PID_RANK" != "" ];then
