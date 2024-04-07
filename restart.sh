@@ -19,4 +19,4 @@ if [  "$PID_RANK" != "" ];then
 fi
 
 
-nohup python manage.py runserver 0.0.0.0:8000 > run.log 2>&1 &
+nohup python manage.py runserver 0.0.0.0:8090 > run.log 2>&1 &
